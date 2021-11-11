@@ -28,7 +28,7 @@ namespace charuco_detector {
 		private_node_handle_->param("charuco/minCornerDistanceRate", detector_parameters_->minCornerDistanceRate, 0.05);
 		private_node_handle_->param("charuco/minDistanceToBorder", detector_parameters_->minDistanceToBorder, 3);
 		private_node_handle_->param("charuco/minMarkerDistanceRate", detector_parameters_->minMarkerDistanceRate, 0.05);
-		//private_node_handle_->param("charuco/cornerRefinementMethod", detector_parameters_->cornerRefinementMethod, 0);
+		// private_node_handle_->param("charuco/cornerRefinementMethod", detector_parameters_->cornerRefinementMethod, 0);
 		private_node_handle_->param("charuco/cornerRefinementWinSize", detector_parameters_->cornerRefinementWinSize, 5);
 		private_node_handle_->param("charuco/cornerRefinementMaxIterations", detector_parameters_->cornerRefinementMaxIterations, 30);
 		private_node_handle_->param("charuco/cornerRefinementMinAccuracy", detector_parameters_->cornerRefinementMinAccuracy, 0.1);
@@ -38,6 +38,15 @@ namespace charuco_detector {
 		private_node_handle_->param("charuco/maxErroneousBitsInBorderRate", detector_parameters_->maxErroneousBitsInBorderRate, 0.35);
 		private_node_handle_->param("charuco/minOtsuStdDev", detector_parameters_->minOtsuStdDev, 5.0);
 		private_node_handle_->param("charuco/errorCorrectionRate", detector_parameters_->errorCorrectionRate, 0.6);
+		// private_node_handle_->param("charuco/aprilTagMinClusterPixels", detector_parameters_->aprilTagMinClusterPixels, 5);
+		// private_node_handle_->param("charuco/aprilTagMaxNmaxima", detector_parameters_->aprilTagMaxNmaxima, 10);
+		// private_node_handle_->param("charuco/aprilTagCriticalRad", detector_parameters_->aprilTagCriticalRad, 0.17453292519);
+		// private_node_handle_->param("charuco/aprilTagMaxLineFitMse", detector_parameters_->aprilTagMaxLineFitMse, 10.0);
+		// private_node_handle_->param("charuco/aprilTagMinWhiteBlackDiff", detector_parameters_->aprilTagMinWhiteBlackDiff, 5);
+		// private_node_handle_->param("charuco/aprilTagDeglitch", detector_parameters_->aprilTagDeglitch, 0);
+		// private_node_handle_->param("charuco/aprilTagQuadDecimate", detector_parameters_->aprilTagQuadDecimate, 0.0);
+		// private_node_handle_->param("charuco/aprilTagQuadSigma", detector_parameters_->aprilTagQuadSigma, 0.0);
+		// private_node_handle_->param("charuco/detectInvertedMarker", detector_parameters_->detectInvertedMarker, false);
 
 		private_node_handle_->param("charuco/squaresSidesSizeM", squares_sides_size_m_, 0.0280);
 		private_node_handle_->param("charuco/markersSidesSizeM", markers_sides_size_m_, 0.0168);
@@ -81,7 +90,7 @@ namespace charuco_detector {
 		private_node_handle_->param("image_analysis_publish_topic", image_results_publish_topic_, image_topic_ + std::string("_charuco_detection"));
 		private_node_handle_->param("charuco_pose_publish_topic", charuco_pose_publish_topic_, image_topic_ + std::string("_charuco_pose"));
 
-		if (dictionary_id_ > 0)
+		if (dictionary_id_ > -1 && dictionary_id_ < 20)
 			dictionary_ = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(dictionary_id_));
 		else
 			dictionary_ = cv::aruco::generateCustomDictionary(number_of_markers_, number_of_bits_for_markers_sides_);
@@ -129,7 +138,7 @@ namespace charuco_detector {
 		if (valid_camera_info) {
 			camera_info_ = _msg;
 			camera_intrinsics_matrix = cv::Mat::zeros(3, 3, CV_64F);
-			camera_distortion_coefficients_matrix = cv::Mat::zeros(1, 5, CV_64F);
+			camera_distortion_coefficients_matrix = cv::Mat::zeros(1, _msg->D.size(), CV_64F);
 
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
@@ -137,7 +146,7 @@ namespace charuco_detector {
 				}
 			}
 
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < _msg->D.size(); i++) {
 				camera_distortion_coefficients_matrix.at<double>(0, i) = _msg->D[i];
 			}
 		} else {
@@ -190,7 +199,7 @@ namespace charuco_detector {
 			cv::Vec3d camera_rotation, camera_translation;
 			cv::Mat image_results;
 
-			if (detectChArUcoBoard(image_grayscale, camera_intrinsics_matrix, camera_distortion_coefficients_matrix, camera_rotation, camera_translation, image_results, true)) {
+			if (detectChArUcoBoard(image_grayscale, camera_intrinsics_matrix, camera_distortion_coefficients_matrix, camera_rotation, camera_translation, image_results, false)) {
 				geometry_msgs::PoseStamped charuco_pose;
 				charuco_pose.header = _msg->header;
 				fillPose(camera_rotation, camera_translation, charuco_pose);
