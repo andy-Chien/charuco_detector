@@ -18,11 +18,11 @@
 	<arg name="charuco_pose_publish_topic" default="$(arg image_topic)_charuco_pose" />
 
 	<!-- Change the charuco TF frame if you need poses to be estimated from several charuco boards -->
-	<arg name="charuco_tf_frame" default="charuco" />
+	<arg name="charuco_tf_frame" default="calib_charuco" />
 
 	<!-- If necessary, the TF publisher of the charuco_detector can use a custom frame_id instead of using the one present in the header of the sensor_msgs/Image messages -->
 	<!-- If [sensor_frame_override] is empty, the TF publisher will use [ image_msg.header.frame_id -> charuco_tf_frame ], otherwise it will use [ sensor_frame_override -> charuco_tf_frame ] -->
-	<arg name="sensor_frame_override" default="" />
+	<arg name="sensor_frame_override" default="calib_camera" />
 
 
 	<!-- Fine tune the yaml and parameters below if needed -->

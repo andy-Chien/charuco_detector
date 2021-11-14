@@ -140,6 +140,9 @@ namespace charuco_detector {
 			camera_intrinsics_matrix = cv::Mat::zeros(3, 3, CV_64F);
 			camera_distortion_coefficients_matrix = cv::Mat::zeros(1, _msg->D.size(), CV_64F);
 
+			if(_msg->D.size() != 4 && _msg->D.size() != 5 && _msg->D.size() != 8 && _msg->D.size() != 12)
+				ROS_ERROR("Size of camera distortion coefficients not support");
+				
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
 					camera_intrinsics_matrix.at<double>(i, j) = _msg->K[i * 3 + j];
